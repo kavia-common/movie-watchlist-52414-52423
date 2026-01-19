@@ -1,32 +1,23 @@
-/* CSS Variables for Theme Management */
-:root {
-  /* Light theme colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --text-primary: #282c34;
-  --text-secondary: #61dafb;
-  --border-color: #e9ecef;
-  --button-bg: #007bff;
-  --button-text: #ffffff;
-}
-
-[data-theme="dark"] {
-  /* Dark theme colors */
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #282c34;
-  --text-primary: #ffffff;
-  --text-secondary: #61dafb;
-  --border-color: #404040;
-  --button-bg: #0056b3;
-  --button-text: #ffffff;
-}
+/* App-level styles built on the global light-theme tokens in index.css */
 
 .App {
-  text-align: center;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background: var(--color-background);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.App-header {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--color-background);
+  color: var(--color-text);
 }
 
 .App-logo {
@@ -34,54 +25,134 @@
   pointer-events: none;
 }
 
+/* Keep existing CRA animation behavior */
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
-.App-header {
-  background-color: var(--bg-secondary);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* Link styling: now based on primary token */
+.App-link {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ---------- Foundation: sensible defaults for common elements ---------- */
+
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: var(--text-primary);
-  transition: background-color 0.3s ease;
-  position: relative;
-}
+  gap: 8px;
 
-.App-link {
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
-}
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 
-.theme-toggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background-color: var(--button-bg);
-  color: var(--button-text);
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease,
+    border-color 120ms ease, color 120ms ease;
 }
 
-.theme-toggle:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  opacity: 0.9;
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(59, 130, 246, 0.35);
 }
 
-.theme-toggle:active {
+.btn:active {
   transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  border-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.98);
+}
+
+.btn-success {
+  background: var(--color-success);
+  border-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  filter: brightness(0.98);
+}
+
+.btn-error {
+  background: var(--color-error);
+  border-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
+}
+
+.btn-error:hover {
+  filter: brightness(0.98);
+}
+
+.input {
+  width: 100%;
+  max-width: 520px;
+
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.input:focus {
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+
+/* ---------- Utility accents (available to use later without changing functionality) ---------- */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.bg-surface {
+  background: var(--color-surface);
+}
+
+.surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 @keyframes App-logo-spin {
@@ -90,15 +161,5 @@
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-/* Responsive design for mobile */
-@media (max-width: 768px) {
-  .theme-toggle {
-    top: 10px;
-    right: 10px;
-    padding: 8px 16px;
-    font-size: 12px;
   }
 }
