@@ -1,12 +1,60 @@
-import React, { useId, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import './App.css';
 
 /**
  * Small, single-file watchlist implementation.
- * - No persistence (in-memory only)
+ * - localStorage persistence
  * - Accessible form controls
  * - Simple actions: toggle watched, remove
  */
+
+const STORAGE_KEY = 'movie_watchlist_items';
+
+/**
+ * Safely parse watchlist items from localStorage.
+ * Returns null if storage missing/invalid.
+ */
+function readWatchlistFromStorage() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+
+    // Validate/coerce shape (defensive against older/bad data).
+    const items = parsed
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null;
+
+        const title = typeof item.title === 'string' ? item.title : '';
+        const id = typeof item.id === 'string' ? item.id : '';
+        const watched = typeof item.watched === 'boolean' ? item.watched : false;
+        const createdAt =
+          typeof item.createdAt === 'number' ? item.createdAt : Date.now();
+
+        if (!id || !title.trim()) return null;
+
+        return { id, title: title.trim(), watched, createdAt };
+      })
+      .filter(Boolean);
+
+    return items;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Safely write watchlist items to localStorage.
+ */
+function writeWatchlistToStorage(items) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    // Ignore storage errors (e.g., private mode, quota).
+  }
+}
 
 // PUBLIC_INTERFACE
 function App() {
@@ -15,10 +63,23 @@ function App() {
   const inputId = useId();
 
   const [newTitle, setNewTitle] = useState('');
-  const [movies, setMovies] = useState(() => [
-    { id: 'm1', title: 'The Matrix', watched: false },
-    { id: 'm2', title: 'Spirited Away', watched: true },
-  ]);
+  const [formError, setFormError] = useState('');
+
+  const [movies, setMovies] = useState(() => {
+    const stored = readWatchlistFromStorage();
+    if (stored) return stored;
+
+    // Default seed if nothing stored yet.
+    return [
+      { id: 'm1', title: 'The Matrix', watched: false, createdAt: Date.now() - 86400000 * 2 },
+      { id: 'm2', title: 'Spirited Away', watched: true, createdAt: Date.now() - 86400000 },
+    ];
+  });
+
+  // Persist to localStorage on any change.
+  useEffect(() => {
+    writeWatchlistToStorage(movies);
+  }, [movies]);
 
   const trimmedTitle = newTitle.trim();
 
@@ -29,17 +90,35 @@ function App() {
 
   const remainingCount = movies.length - watchedCount;
 
+  const normalizedNewTitle = trimmedTitle.toLocaleLowerCase();
+
   // PUBLIC_INTERFACE
   function handleAddMovie(e) {
-    /** Add a new movie to the watchlist (in-memory). */
+    /** Add a new movie to the watchlist (persisted to localStorage). */
     e.preventDefault();
 
-    if (!trimmedTitle) return;
+    setFormError('');
+
+    // Validation: disallow empty/whitespace-only.
+    if (!trimmedTitle) {
+      setFormError('Please enter a movie title.');
+      return;
+    }
+
+    // Simple duplicate rule: ignore exact duplicates (case-insensitive).
+    const isDuplicate = movies.some(
+      (m) => m.title.trim().toLocaleLowerCase() === normalizedNewTitle
+    );
+    if (isDuplicate) {
+      setFormError('That movie is already in your watchlist.');
+      return;
+    }
 
     const newMovie = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       title: trimmedTitle,
       watched: false,
+      createdAt: Date.now(),
     };
 
     setMovies((prev) => [newMovie, ...prev]);
@@ -95,10 +174,24 @@ function App() {
                 className="input"
                 type="text"
                 value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
+                onChange={(e) => {
+                  setNewTitle(e.target.value);
+                  if (formError) setFormError('');
+                }}
                 placeholder="e.g., Inception"
                 autoComplete="off"
+                aria-invalid={formError ? 'true' : 'false'}
+                aria-describedby={formError ? `${inputId}-error` : undefined}
               />
+              {formError ? (
+                <div
+                  id={`${inputId}-error`}
+                  role="alert"
+                  style={{ marginTop: 8, fontSize: 13, color: 'var(--color-error)', fontWeight: 600 }}
+                >
+                  {formError}
+                </div>
+              ) : null}
             </div>
 
             <button
