@@ -143,9 +143,29 @@ function App() {
     <div className="App">
       <div style={{ width: '100%', maxWidth: 860, margin: '0 auto', padding: '28px 16px 44px' }}>
         <header style={{ marginBottom: 18 }}>
-          <h1 style={{ margin: 0, fontSize: 28, letterSpacing: '-0.02em' }}>
-            Movie Watchlist
-          </h1>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 12,
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+            }}
+          >
+            <h1 style={{ margin: 0, fontSize: 28, letterSpacing: '-0.02em' }}>
+              Movie Watchlist
+            </h1>
+
+            <div className="watchlist-summary" aria-label="Watchlist counters">
+              <span>
+                Total: <strong>{movies.length}</strong>
+              </span>
+              <span>
+                Watched: <strong>{watchedCount}</strong>
+              </span>
+            </div>
+          </div>
+
           <p style={{ margin: '8px 0 0', color: 'var(--color-muted)' }}>
             Add movies you want to watch, mark them watched, or remove them.
           </p>
@@ -204,101 +224,85 @@ function App() {
               Add
             </button>
           </form>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: 10,
-              flexWrap: 'wrap',
-              marginTop: 12,
-              color: 'var(--color-muted)',
-              fontSize: 14,
-            }}
-            aria-label="Watchlist summary"
-          >
-            <span>
-              Total: <strong style={{ color: 'var(--color-text)' }}>{movies.length}</strong>
-            </span>
-            <span>
-              Remaining: <strong style={{ color: 'var(--color-text)' }}>{remainingCount}</strong>
-            </span>
-            <span>
-              Watched: <strong style={{ color: 'var(--color-text)' }}>{watchedCount}</strong>
-            </span>
-          </div>
         </section>
 
         <main className="surface" style={{ padding: 16 }}>
           <h2 style={{ margin: 0, fontSize: 16 }}>Your watchlist</h2>
 
           {movies.length === 0 ? (
-            <p style={{ margin: '12px 0 0', color: 'var(--color-muted)' }}>
-              Your list is empty. Add a movie above.
-            </p>
+            <div className="empty-state" role="status" aria-live="polite">
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>No movies yet</div>
+              <div>
+                Start building your list by adding a title above. Tip: try something you’ve been meaning to watch.
+              </div>
+            </div>
           ) : (
-            <ul
-              aria-label="Movies in watchlist"
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: '12px 0 0',
-                display: 'grid',
-                gap: 10,
-              }}
-            >
-              {movies.map((movie) => {
-                const statusText = movie.watched ? 'Watched' : 'Not watched';
-                const toggleLabel = movie.watched ? 'Mark as not watched' : 'Mark as watched';
+            <>
+              <div className="watchlist-summary" aria-label="Watchlist summary">
+                <span>
+                  Remaining: <strong>{remainingCount}</strong>
+                </span>
+              </div>
 
-                return (
-                  <li
-                    key={movie.id}
-                    className="surface"
-                    style={{
-                      padding: 12,
-                      display: 'grid',
-                      gridTemplateColumns: '1fr auto',
-                      gap: 10,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          textDecoration: movie.watched ? 'line-through' : 'none',
-                        }}
-                      >
-                        {movie.title}
+              <ul
+                aria-label="Movies in watchlist"
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: '12px 0 0',
+                  display: 'grid',
+                  gap: 10,
+                }}
+              >
+                {movies.map((movie) => {
+                  const statusText = movie.watched ? 'Watched' : 'Not watched';
+                  const toggleLabel = movie.watched ? 'Mark as not watched' : 'Mark as watched';
+
+                  return (
+                    <li
+                      key={movie.id}
+                      className="surface"
+                      style={{
+                        padding: 12,
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        gap: 10,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <div>
+                        <div className={`movie-title ${movie.watched ? 'is-watched' : ''}`}>
+                          {movie.title}
+                        </div>
+                        <div className="movie-status">
+                          Status: <span>{statusText}</span>
+                        </div>
                       </div>
-                      <div style={{ marginTop: 4, fontSize: 13, color: 'var(--color-muted)' }}>
-                        Status: <span>{statusText}</span>
+
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <button
+                          type="button"
+                          className={movie.watched ? 'btn' : 'btn btn-success'}
+                          onClick={() => handleToggleWatched(movie.id)}
+                          aria-label={`${toggleLabel} for ${movie.title}`}
+                        >
+                          {movie.watched ? 'Mark unwatch' : 'Mark watched'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-error"
+                          onClick={() => handleRemove(movie.id)}
+                          aria-label={`Remove ${movie.title} from watchlist`}
+                        >
+                          Remove movie
+                        </button>
                       </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                      <button
-                        type="button"
-                        className={movie.watched ? 'btn' : 'btn btn-success'}
-                        onClick={() => handleToggleWatched(movie.id)}
-                        aria-label={`${toggleLabel} for ${movie.title}`}
-                      >
-                        {movie.watched ? 'Unwatch' : 'Watched'}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-error"
-                        onClick={() => handleRemove(movie.id)}
-                        aria-label={`Remove ${movie.title} from watchlist`}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
         </main>
       </div>

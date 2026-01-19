@@ -96,6 +96,11 @@
   filter: brightness(0.98);
 }
 
+.btn-success:focus-visible {
+  outline: 3px solid rgba(6, 182, 212, 0.42);
+  outline-offset: 2px;
+}
+
 .btn-error {
   background: var(--color-error);
   border-color: rgba(0, 0, 0, 0);
@@ -104,6 +109,50 @@
 
 .btn-error:hover {
   filter: brightness(0.98);
+}
+
+.btn-error:focus-visible {
+  outline: 3px solid rgba(239, 68, 68, 0.42);
+  outline-offset: 2px;
+}
+
+/* ---------- Watchlist-specific polish ---------- */
+
+.watchlist-summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.watchlist-summary strong {
+  color: var(--color-text);
+}
+
+.empty-state {
+  margin: 12px 0 0;
+  padding: 14px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px dashed rgba(59, 130, 246, 0.28);
+  color: rgba(17, 24, 39, 0.76);
+}
+
+.movie-title {
+  font-weight: 700;
+}
+
+.movie-title.is-watched {
+  text-decoration: line-through;
+  color: rgba(17, 24, 39, 0.62); /* muted but still accessible on white */
+}
+
+.movie-status {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
 
 .input {
